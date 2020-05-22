@@ -148,3 +148,87 @@ def PETDST(aDayPet, aLatDeg, aMonth, aDay):
             
 
     return aHrPET
+
+
+def ExtractHydrologicStateVariables(aBinaryData, aGroup):
+    '''
+    This function outputs the state variable table based on the 
+    data passed and the group 
+    
+    :param Series aBinaryData: Values of all group members at the date when 
+    the state variables are needed to be extracted
+    :param string aGroup: Name of the group
+    
+    aBinaryData should look like this
+    PERLND_21_AGWET_4    0.000000
+    PERLND_21_AGWI_4     1.883073
+    PERLND_21_AGWO_4     1.006952
+    PERLND_21_AGWS_4     1.468427
+    PERLND_21_BASET_4    0.128918
+    
+    aGroup should be 'PWATER' or 'IWATER' or 'HYDR'
+    '''
+    
+    ListOfOperations=[]
+    for OPN in aBinaryData.index:
+        OPNNumber=OPN.split('_')[1]
+        if OPNNumber in ListOfOperations:continue
+        ListOfOperations.append(OPNNumber)
+    tStep=aBinaryData.index[0][-2:]
+    ListOfStateVariables=[]
+    if aGroup=='PWATER':
+        ListOfStateVariables=['CEPS','SURS','UZS','IFWS','LZS','AGWS','GWVS']
+        output='  PWAT-STATE1\n'
+        output+='*** < PLS>  PWATER state variables (in)\n'
+        output+='*** x  - x      CEPS      SURS       UZS      IFWS       LZS      AGWS      GWVS\n'
+
+        for OPN in ListOfOperations:    
+            output+='{:>5}'.format(OPN)
+            output+='     '
+            for StateVariable in ListOfStateVariables:
+                ColumnName='PERLND_'+ str(OPN) + '_' + StateVariable + tStep
+                output+='{:10.4f}'.format(aBinaryData[ColumnName])
+            output+='\n'
+        output+='  END PWAT-STATE1\n'
+
+    elif aGroup=='IWATER':
+        ListOfStateVariables=['RETS','SURS']
+        output+='  IWAT-STATE1\n'
+        output+='*** <ILS >  IWATER state variables (inches)\n'
+        output+='*** x -  x      RETS      SURS\n'
+        
+        for OPN in ListOfOperations:
+            output+='{:>5}'.format(OPN)
+            output+='     '
+            for StateVariable in ListOfStateVariables:
+                ColumnName='IMPLND_'+ str(OPN) + '_' + StateVariable + tStep
+                output+='{:10.4f}'.format(aBinaryData[ColumnName])
+            output+='\n'
+        output+='  END IWAT-STATE1\n'
+
+    elif aGroup=='HYDR':
+        ListOfStateVariables=['VOL']
+        output+='  HYDR-INIT\n'
+        output+='***         Initial conditions for HYDR section\n'
+        output+='***RC HRES       VOL  CAT Initial value  of COLIND     initial  value  of OUTDGT\n'
+        output+='*** x  - x     ac-ft      for each possible   exit  for each possible exit,ft3\n'
+        
+        
+        for OPN in ListOfOperations:
+            output+='{:>5}'.format(OPN)
+            output+='     '
+            for StateVariable in ListOfStateVariables:
+                ColumnName='RCHRES_'+ str(OPN) + '_' + StateVariable + tStep
+                output+='{:10.4f}'.format(aBinaryData[ColumnName])
+                output+='       4.2  4.5  4.5  4.5  4.2       2.1  1.2  0.5  1.2  1.8'
+            output+='\n'
+        
+        output+='  END HYDR-INIT\n'
+    else:
+        output='Not Implemented'
+    return output
+
+    
+
+    
+        

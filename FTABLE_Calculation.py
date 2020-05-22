@@ -9,12 +9,21 @@ This program is used to calculate FTABLE for storm drains and natural drainages
 import os
 import pandas as pd
 import numpy as np
+from io import StringIO
 
 datafile='C:\BASINS45\modelout\LowWill_APGIS\Hydraulics\RCHRES_Details_PVT_Drainages.csv'
 #datafile='C:\BASINS45\modelout\LowWill_APGIS\Hydraulics\RCHRES_Details_SW_CSO.csv'
 filelocation,filename=os.path.split(datafile)
 OutputFile=os.path.splitext(filename)[0]+'_FTABLE.txt'
 Hydraulicdata=pd.read_csv(datafile)        
+
+
+testdata='SUBBASINS,TAREAMI2,Type,Pipe_Dia_ft,Manning n,FloodPlain n,SLO2_mean\n'\
+'101,0.05,Sewer,2,0.024,,0.01\n'\
+'102,0.1,Natural,,0.1,0.2,0.02\n'
+Hydraulicdata=pd.read_csv(StringIO(testdata))
+
+
 def SidePiece(aDepth, aDepthSlopeChange, aSideSlopeUpperFP, \
               aDepthChannel, aSideSlopeLowerFP, aSlopeSide):
     if aDepth>aDepthSlopeChange:
