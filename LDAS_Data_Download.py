@@ -8,6 +8,8 @@ This example script downloads the GLDAS data for two stations,
 adjust the time zone and saves them in a WDM file.
 Please refer to the tsgettoolbox documentation for more data sources.
 https://timcera.bitbucket.io/tsgettoolbox/docsrc/index.html#tsgettoolbox-documentation
+
+This script has been tested with Python 3.8
 """
 
 from tsgettoolbox import tsgettoolbox as tsget
@@ -70,9 +72,9 @@ with open("MetLog.txt", 'w') as Logfile:
             stationID = station
             print("Downloading " + const + " data for grid: " + station[0]) 
             df = tsget.ldas(lat=station[1], lon=station[2],
-                               variable=LDAS_variable,
-                               startDate="2015-01-01",
-                               endDate="2019-01-31")
+                               variables=LDAS_variable,
+                               startDate="2015-01-01"
+                               )
             column_name = df.columns[0]
             df = df[column_name]
             df.dropna()
@@ -90,5 +92,6 @@ with open("MetLog.txt", 'w') as Logfile:
             Logfile.write("Constituent: " + const + ", Column Name:"
             + column_name + ", DSN: " + str(index) + "\n")
             index += 1
+
 
 
