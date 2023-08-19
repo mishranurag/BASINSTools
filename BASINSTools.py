@@ -21,8 +21,12 @@ def PanEvaporationValueComputedByHamon(aTAVC, aMonth, aDay,
     :param float aTAVC: Average air temperature value or series in degF or degC
     :param integer aMonth: Month of the year
     :param integer aDay: Day of the month
-    :param float aLatDeg: Latitude of the loation in Degrees
+    :param float aLatDeg: Latitude of the location in Degrees
     :param float aDegF: True if temperature is in degF, False if in degC
+
+    An example code for calculating PET is below. If df is a daily average air temperature timeseries at latitude = 25.43, 
+    and temperature in deg C
+    df.apply(BASINSTools.PanEvaporationValueComputedByHamon, args=(df.index.month, df.index.day, 25.43, False))
     '''
     
     MetComputeLatitudeMin=-66.5
@@ -63,7 +67,6 @@ def PanEvaporationValueComputedByHamon(aTAVC, aMonth, aDay,
         #when the estimated pan evaporation is negative
         #the value is set to zero
         lPanEvap.where(lPanEvap<0,0)
-        
         return lPanEvap
 
 
@@ -77,9 +80,20 @@ def PETDST(aDayPet, aLatDeg, aMonth, aDay):
     refer to BASINS documentation.
     
     :param float aDayPet: Average PET in inches
-    :param float aLatDeg: Latitude of the loation in Degrees
+    :param float aLatDeg: Latitude of the location in Degrees
     :param integer aMonth: Month of the year
     :param integer aDay: Day of the month 
+
+    An example code for calculating hourly Potential ET timeseries with an input dailytimeseries 
+    of PET is shown below.
+    
+    PEVT=[]
+    for index, row in df.iterrows():
+        hourlyValues = BASINSTools.PETDST(row[0], 25.43, index.month, index.day)
+        PEVT.append(pd.Series(data=hourlyValues, index=pd.date_range(start=index, periods=24, freq='H')))
+    PEVT=pd.concat(PEVT)
+
+
     '''
     MetComputeLatitudeMin=-66.5
     MetComputeLatitudeMax=66.5
@@ -119,6 +133,7 @@ def PETDST(aDayPet, aLatDeg, aMonth, aDay):
         TR4 = TR3 + DTR4
         aHrPET=24*[0]
         CURVE=24*[0]
+        #
         #calculate hourly distribution curve
         for IK in range(24):
             #print(IK)
@@ -145,7 +160,7 @@ def PETDST(aDayPet, aLatDeg, aMonth, aDay):
             #print('CURVE Value', IK, CURVE[IK])
             if aHrPET[IK] > 40:
                 print("Bad Hourly Value ", aHrPET[IK])
-            
+
 
     return aHrPET
 
